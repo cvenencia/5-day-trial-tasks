@@ -1,0 +1,30 @@
+{% extends 'base.html' %} {% block content %}
+<script defer src="{{url_for('static', filename= 'js/scraper.js')}}"></script>
+<div class="container-lg">
+    <table>
+        <thead>
+            <tr>
+                <td>URL</td>
+                <td>Type</td>
+                <td>Notes</td>
+            </tr>
+        </thead>
+        <tbody>
+            {% for result in results %}
+            <tr>
+                <td>{{ result['url'] }}</td>
+                <td>{{ 'PASS' if result['pass'] else 'FAIL' }}</td>
+                <td>{{ result['notes'] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<style>
+    :root {
+        --go-back-url: url({{url_for('static', filename= 'assets/go-back.svg')}});
+    }
+</style>
+
+{% endblock %}
