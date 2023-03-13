@@ -93,6 +93,14 @@ section.languages-section .input-group {
 
 .input-group {
     display: flex;
+    flex-direction: column;
+    gap: 1em;
+}
+
+textarea {
+    width: 100%;
+    resize: none;
+    min-width: 40rem;
 }
 
 input:not([type='checkbox']) {
@@ -189,7 +197,7 @@ header {
 }
 
 pre {
-    height: min(70vh, 40rem);
+    height: 20rem;
     overflow: scroll;
     scrollbar-width: thin;
     margin-block: 1em;
@@ -226,4 +234,62 @@ pre a:visited {
 
 .download-csv {
     animation: grow 2s ease-in-out infinite;
+}
+
+.table-wrapper {
+    margin: 10px 70px 70px;
+    box-shadow: 0px 35px 50px rgba(0, 0, 0, 0.2);
+}
+
+table {
+    border-radius: 5px;
+    font-size: 12px;
+    font-weight: normal;
+    border: none;
+    border-collapse: collapse;
+    width: 100%;
+    max-width: 100%;
+    white-space: nowrap;
+    background-color: white;
+    border-spacing: 0.25em;
+    border-collapse: separate;
+}
+
+table td,
+table th {
+    word-wrap: break-word;
+    text-align: center;
+    padding: 8px;
+}
+
+table td:nth-child(1) {
+    overflow: hidden;
+    max-width: 35rem;
+}
+
+table td {
+    border-right: 1px solid #f8f8f8;
+    font-size: 12px;
+}
+
+table thead th {
+    color: #ffffff;
+    background: #4fc3a1;
+}
+
+table thead th:nth-child(odd) {
+    color: #ffffff;
+    background: #324960;
+}
+
+table tr:nth-child(even) {
+    background: #f8f8f8;
+}
+
+.pass {
+    background-color: greenyellow;
+}
+
+.fail {
+    background-color: crimson;
 }

@@ -4,4 +4,4 @@ from app import app
 
 @app.route('/')
 def index():
-    return render_template('index.html', title='Udemy Free Courses Scraper')
+    return render_template('index.html', title='Trial task: Day 1')

@@ -3,9 +3,12 @@
 <div class="container">
     <div class="content-container">
         <div class="cog"><img src="{{ url_for('static', filename= 'assets/cog.svg') }}"></img></div>
-        <h1>Scrape Free Udemy courses</h1>
+        <h1>Trial task: Day 1</h1>
         <form action="scraper">
-            <textarea name="urls" id="urls" cols="30" rows="10"></textarea>
+            <div class="input-group">
+                <label for="urls">URLs to scrape:</label>
+                <textarea name="urls" id="urls" cols="30" rows="10"></textarea>
+            </div>
             <button type="submit">Scrape</button>
         </form>
     </div>

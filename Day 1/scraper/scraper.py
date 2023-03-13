@@ -5,6 +5,7 @@ from selenium.webdriver.chrome.options import Options as ChromeOptions
 from selenium.webdriver.common.action_chains import ActionChains
 
 from time import sleep
+import json
 
 from langdetect import detect
 
@@ -26,74 +27,93 @@ chrome_options.binary_location = binary_location
 # caps["pageLoadStrategy"] = "eager"
 
 
-def scrape_pages(**kwargs):
+def scrape_pages(log, **kwargs):
     urls = kwargs['urls'].split('\n')
-    driver = Chrome(executable_path=driver_location,
-                    options=chrome_options)
+    driver = Chrome()
     results = []
     for url in urls:
-        result = {'url': url, 'pass': True, 'notes': ""}
-        driver.get(url)
-        # Check index is translated
         try:
-            translated = False
-            retries = 0
-            while not translated and retries < 3:
-                retries += 1
-                title = select('main > section:nth-child(1) h2',
-                               driver).get_attribute('textContent')
-                if detect(title) != 'hi':
+            if len(url) == 1:
+                continue
+            log(f'Scraping {insert_a_tag(url[0:-1])}...')
+            result = {'url': url, 'pass': True, 'notes': ""}
+            driver.get(url)
+
+            # Check index is translated
+            try:
+                translated = False
+                retries = 0
+                while not translated and retries <= 3:
+                    retries += 1
+                    title = select('main > section:nth-child(1) h2',
+                                   driver).get_attribute('textContent')
+                    if detect(title) != 'hi':
+                        result['pass'] = False
+                        result['notes'] += "Not translated. "
+                        print('Sleeping')
+                        log(
+                            f'❌ This page isn\'t translated.{f" Maybe is translated via Javascript. Waiting and trying again... ({retries}/{3})" if retries < 3 + 1 else ""}', tab=1)
+                        sleep(1)
+                    else:
+                        log('✅ This page is translated!', tab=1)
+                        translated = True
+            except Exception as e:
+                log('❌ Wrong page', tab=1)
+                result['pass'] = False
+                result['notes'] += 'Wrong page. '
+                results.append(result)
+                continue
+
+            # Check high resolution image
+            try:
+                img = select('#learning-illus img',
+                             driver)
+                if img.get_attribute('data-src') is not None and "&blur=" in img.get_attribute('src'):
+                    log('❌ Images are not high resolution', tab=1)
                     result['pass'] = False
-                    result['notes'] += "Not translated. "
-                    print('Sleeping')
-                    sleep(1)
+                    result['notes'] += 'Images are not high resolution. '
                 else:
-                    translated = True
-        except Exception as e:
-            result['pass'] = False
-            result['notes'] += 'Wrong page. '
+                    log('✅ Images are fine!', tab=1)
+            except Exception as e:
+                print(e)
+
+            # Hover mouse to check JS
+            try:
+                a = ActionChains(driver)
+                button = select(
+                    'button[data-name="LARGE_UP_MAIN_NAV_TRIGGER"]', driver)
+                a.move_to_element(button).perform()
+                if 'nav-open' not in select('html', driver).get_attribute('class'):
+                    log('❌ Javascript doesn\'t work', tab=1)
+                    result['pass'] = False
+                    result['notes'] += 'Javascript not working. '
+                else:
+                    log('✅ Javascript works!', tab=1)
+            except Exception as e:
+                pass
+
+            # Check if second link is translated
+            try:
+                new_url = select(
+                    'a.link-gray-underline', driver).get_attribute('href')
+                open_second_tab(driver)
+                driver.get(new_url)
+                text = select('p.hint-card__body',
+                              driver).get_attribute('textContent')
+                if detect(text) != 'hi':
+                    log('❌ Inner pages are not translated', tab=1)
+                    result['pass'] = False
+                    result['notes'] += "Inner pages not translated. "
+                else:
+                    log('✅ Inner pages are translated!', tab=1)
+                close_tab_go_first_tab(driver)
+            except Exception as e:
+                close_tab_go_first_tab(driver)
+
             results.append(result)
+        except:
             continue
-
-        # Check high resolution image
-        try:
-            img = select('#learning-illus img',
-                         driver)
-            if img.get_attribute('data-src') is not None and "&blur=" in img.get_attribute('src'):
-                result['pass'] = False
-                result['notes'] += 'Images are not high resolution. '
-        except Exception as e:
-            print(e)
-
-        # Hover mouse to check JS
-        try:
-            a = ActionChains(driver)
-            button = select(
-                'button[data-name="LARGE_UP_MAIN_NAV_TRIGGER"]', driver)
-            a.move_to_element(button).perform()
-            if 'nav-open' not in select('html', driver).get_attribute('class'):
-                result['pass'] = False
-                result['notes'] += 'Javascript not working. '
-        except Exception as e:
-            pass
-
-        # Check if second link is translated
-        try:
-            new_url = select(
-                'a.link-gray-underline', driver).get_attribute('href')
-            open_second_tab(driver)
-            driver.get(new_url)
-            text = select('p.hint-card__body',
-                          driver).get_attribute('textContent')
-            if detect(text) != 'hi':
-                result['pass'] = False
-                result['notes'] += "Inner pages not translated. "
-            close_tab_go_first_tab(driver)
-        except Exception as e:
-            close_tab_go_first_tab(driver)
-
-        results.append(result)
-    return results
+    log(f'[[RESULTS_READY]]{json.dumps(results)}')
 
 
 def open_second_tab(driver):
@@ -112,3 +132,7 @@ def select(selector, driver):
 
 def select_all(selector, driver):
     return driver.find_elements(By.CSS_SELECTOR, selector)
+
+
+def insert_a_tag(link):
+    return f'<a href="{link}" target="_blank" rel="noopener noreferrer">{link}</a>'

@@ -10,7 +10,15 @@ def scrape():
     except:
         session['urls'] = None
 
-    from scraper.scraper import scrape_pages
-    results = scrape_pages(**session)
+    return render_template('scraper.html', title="Results")
 
-    return render_template('scraper.html', title="asdf", results=results)
+
+@sock.route('/connect')
+def handle_message(socket):
+    def log(message, end='\n', tab=0):
+        tabulation = '    '
+        socket.send(f'{tabulation * tab}{message}{end}')
+
+    from scraper.scraper import scrape_pages
+    scrape_pages(log, **session)
+    socket.close()
