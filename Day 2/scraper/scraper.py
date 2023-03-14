@@ -46,6 +46,8 @@ def scrape_pages(log, **kwargs):
                     if original_price:
                         original_price_usd = get_cop_usd_convertion(
                             float(original_price))
+                    else:
+                        original_price_usd = usd_price
                     is_free = ('100 % de descuento' in price_text and 'Gratis' in price_text) or (
                         '100% off' in price_text and 'Free' in price_text)
                     found = True
