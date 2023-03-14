@@ -1,0 +1,23 @@
+{% extends 'base.html' %} {% block content %}
+<script defer src="{{url_for('static', filename= 'js/index.js')}}"></script>
+<div class="container">
+    <div class="content-container">
+        <div class="cog"><img src="{{ url_for('static', filename= 'assets/cog.svg') }}"></img></div>
+        <h1>Trial task: Day 2</h1>
+        <form action="scraper">
+            <div class="input-group">
+                <label for="urls">Udemy URLs to scrape:</label>
+                <textarea required name="urls" id="urls" cols="30" rows="9"></textarea>
+            </div>
+            <button type="submit">Scrape</button>
+        </form>
+    </div>
+</div>
+
+<style>
+    :root {
+        --cog-url: url({{url_for('static', filename= 'assets/cog.svg')}});
+    }
+</style>
+
+{% endblock %}
